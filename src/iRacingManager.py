@@ -1,0 +1,79 @@
+import irsdk
+import time
+
+
+# this is our State class, with some helpful variables
+class State:
+    ir_connected = False
+    last_car_setup_tick = -1
+
+class iRacingManager:
+
+    def __init__(self, queue):
+        # initializing ir and state
+        self.ir = irsdk.IRSDK()
+        self.state = State()
+
+        self.queue = queue
+
+    
+    # here we check if we are connected to iracing
+    # so we can retrieve some data
+    def check_iracing(self):
+        if self.state.ir_connected and not (self.ir.is_initialized and self.ir.is_connected):
+            self.state.ir_connected = False
+            # don't forget to reset your State variables
+            self.state.last_car_setup_tick = -1
+            # we are shutting down ir library (clearing all internal variables)
+            self.ir.shutdown()
+            print('irsdk disconnected')
+        elif not self.state.ir_connected and self.ir.startup() and self.ir.is_initialized and self.ir.is_connected:
+            self.state.ir_connected = True
+            print('irsdk connected')
+
+    def updateSpeed(self):
+        self.currentSpeed = int(self.ir['Speed'] * 3.6)
+
+    def updateThrottle(self):
+        self.currentThrottle = int(self.ir['Throttle'] * 100)
+
+    def updateBrake(self):
+        self.currentBrake = int(self.ir['Brake'] * 100)
+
+    def loop(self):
+        self.ir.freeze_var_buffer_latest()
+
+        self.updateSpeed()
+        self.updateThrottle()
+        self.updateBrake()
+
+    def constructMessage(self):
+        message={
+            'speed': self.currentSpeed,
+            'throttle': self.currentThrottle,
+            'brake': self.currentBrake
+        } 
+        return str(message)
+
+    
+    def run(self):
+        try:
+            # infinite loop
+            while True:
+                # check if we are connected to iracing
+                self.check_iracing()
+
+                if self.state.ir_connected:
+                    self.loop()
+
+                    message = self.constructMessage()
+
+                    print("Sending message:", message)
+                    self.queue.put(message)
+                
+                # maximum you can use is 1/60
+                time.sleep(1/60)
+        except KeyboardInterrupt:
+            self.ir.shutdown()
+            print("Exiting iRacingManager.")
+            pass
