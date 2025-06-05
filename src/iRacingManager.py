@@ -9,7 +9,7 @@ class State:
 
 class iRacingManager:
 
-    def __init__(self, queue):
+    def __init__(self, queue, settings):
         # initializing ir and state
         self.ir = irsdk.IRSDK()
         self.state = State()
@@ -38,7 +38,18 @@ class iRacingManager:
         self.currentThrottle = int(self.ir['Throttle'] * 100)
 
     def updateBrake(self):
-        self.currentBrake = int(self.ir['Brake'] * 100)
+        self.currentBrake = int(100 - (self.ir['Brake'] * 100))
+
+    def updateClutch(self):
+        self.currentClutch = int(self.ir['Clutch'] * 100)
+
+    def updateGear(self):
+        if self.ir['Gear'] == 0:
+            self.currentGear = 'N'
+        elif self.ir['Gear'] < 0:
+            self.currentGear = 'R'
+        else:
+            self.currentGear = str(self.ir['Gear'])
 
     def loop(self):
         self.ir.freeze_var_buffer_latest()
@@ -46,12 +57,16 @@ class iRacingManager:
         self.updateSpeed()
         self.updateThrottle()
         self.updateBrake()
+        self.updateClutch()
+        self.updateGear()
 
     def constructMessage(self):
         message={
             'speed': self.currentSpeed,
             'throttle': self.currentThrottle,
-            'brake': self.currentBrake
+            'brake': self.currentBrake,
+            'clutch': self.currentClutch,
+            'gear': self.currentGear,
         } 
         return str(message)
 
