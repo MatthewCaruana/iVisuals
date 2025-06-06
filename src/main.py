@@ -18,20 +18,24 @@ if __name__ == '__main__':
     else:
         settings = {}
 
-    # Create a queue for inter-process communication
-    queue = Queue()
+    try:
+        # Create a queue for inter-process communication
+        queue = Queue()
 
-    # Initialize managers
-    iRManager = iRacingManager(queue, settings)
-    overlay = iRacingOverlay(queue, settings)
+        # Initialize managers
+        iRManager = iRacingManager(queue, settings)
+        overlay = iRacingOverlay(queue, settings)
 
-    # Setup the iRacingManager in a separate process
-    iRManagerThread = Process(target=iRManager.run)
+        # Setup the iRacingManager in a separate process
+        iRManagerThread = Process(target=iRManager.run)
 
-    # Start the separate processes
-    iRManagerThread.start()
-    overlay.run()
+        # Start the separate processes
+        print("Starting iRacingManager thread.")
+        iRManagerThread.start()
+        print("Starting iRacingOverlay.")
+        overlay.run()
 
-    iRManagerThread.join()
-
-    print("Exiting main thread.")
+        iRManagerThread.join()
+        print("Exiting main thread.")
+    except KeyboardInterrupt:
+        pass

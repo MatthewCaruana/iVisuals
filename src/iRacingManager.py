@@ -38,10 +38,10 @@ class iRacingManager:
         self.currentThrottle = int(self.ir['Throttle'] * 100)
 
     def updateBrake(self):
-        self.currentBrake = int(100 - (self.ir['Brake'] * 100))
+        self.currentBrake = int(self.ir['Brake'] * 100)
 
     def updateClutch(self):
-        self.currentClutch = int(self.ir['Clutch'] * 100)
+        self.currentClutch = int(100 - (self.ir['Clutch'] * 100))
 
     def updateGear(self):
         if self.ir['Gear'] == 0:
@@ -82,12 +82,10 @@ class iRacingManager:
                     self.loop()
 
                     message = self.constructMessage()
-
-                    print("Sending message:", message)
                     self.queue.put(message)
                 
                 # maximum you can use is 1/60
-                time.sleep(1/60)
+                time.sleep(1/10)
         except KeyboardInterrupt:
             self.ir.shutdown()
             print("Exiting iRacingManager.")

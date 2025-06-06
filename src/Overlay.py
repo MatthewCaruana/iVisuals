@@ -4,6 +4,8 @@ import json
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
+import time
+
 class iRacingOverlay(tk.Tk):
     def __init__(self, queue, settings, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -22,7 +24,7 @@ class iRacingOverlay(tk.Tk):
 
         self.editMode = False
 
-        self.after(17, self.readQueue)
+        self.after(0, self.readQueue)
 
         self.setBindings()
         self.createUIElements()
@@ -58,16 +60,14 @@ class iRacingOverlay(tk.Tk):
 
 
     def readQueue(self):
-        print("In readQueue")
         if not self.queue.empty():
             message = self.queue.get()
-            print("Received message:", message)
             json_acceptable_string = message.replace("'", "\"")
+            print(json_acceptable_string)
 
             converted_message = json.loads(json_acceptable_string)
             self.updateOverlay(converted_message)
-
-        self.after(17, self.readQueue)
+        self.after(60, self.readQueue)
 
     def updateOverlay(self, data):
         # Update speed label
