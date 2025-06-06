@@ -11,8 +11,8 @@ class iRacingOverlay(tk.Tk):
         super().__init__(*args, **kwargs)
         self.queue = queue
         self.title("iRacing Overlay")
-        self.geometry("800x600")
-        self.configure(bg='blue')
+        self.geometry("240x100")
+        self.configure(bg='black')
         self.focus_force()
         self.attributes("-topmost", True)  # Keep the window on top
         self.overrideredirect(True)  # Remove window decorations
@@ -38,32 +38,41 @@ class iRacingOverlay(tk.Tk):
 
     def createUIElements(self):
         # Create a frame for the input history
-        self.inputFrame = tk.Frame(self, bg='black')
-        self.inputFrame.pack(fill=tk.BOTH, expand=True)
-
-        # Create Speed label
-        self.speedLabel = tk.Label(self.inputFrame, text="0 km/h", fg='white', bg='black', font=('Arial', 24))
-        self.speedLabel.pack(pady=20)
+        self.inputFrame = tk.Frame(self, bg='#404040')
+        self.inputFrame.grid(padx=0, pady=0, sticky='nsew')
 
         # Create Gear label
-        self.gearLabel = tk.Label(self.inputFrame, text="N", fg='white', bg='black', font=('Arial', 24))
-        self.gearLabel.pack(pady=20)
+        self.gearLabel = tk.Label(self.inputFrame, text="N", fg='white', bg='#404040', font=('Calibri', 18, 'bold'))
+        self.gearLabel.grid(row=0, column=0, padx=10, pady=10, sticky='nsew')
 
-        self.inputChart = Figure(figsize=(5, 4), dpi=100)
+        # Create Speed label
+        self.speedLabel = tk.Label(self.inputFrame, text="0", fg='white', bg='#404040', font=('Calibri', 10))
+        self.speedLabel.grid(row=1, column=0, padx=10, pady=10, sticky='nsew')
+
+        self.inputChart = Figure(figsize=(2, 1), dpi=100, frameon=False, tight_layout=True)
+        self.updateInputChart()
+        self.inputChartCanvas = FigureCanvasTkAgg(self.inputChart, master=self.inputFrame)
+        self.inputChartCanvas.draw()
+        self.inputChartCanvas.get_tk_widget().grid(column=1, row=0, rowspan=2, padx=1, pady=1, sticky='nsew')
+        self.inputChartCanvas._tkcanvas.config(bg='#404040')
+
+
+    def updateInputChart(self):
         self.inputChartPlot = self.inputChart.add_subplot(111)
+        self.inputChartPlot.set_facecolor('#404040')
+        self.inputChartPlot.axes.get_xaxis().set_visible(False)
+        self.inputChartPlot.axes.get_yaxis().set_visible(False)
+        self.inputChartPlot.axes.set_xlim(0, 100)
+        self.inputChartPlot.axes.set_ylim(0, 100)
         self.inputChartPlot.plot(self.inputChart_xaxis, self.throttleInputHistory, color='green')
         self.inputChartPlot.plot(self.inputChart_xaxis, self.brakeInputHistory, color='red')
         self.inputChartPlot.plot(self.inputChart_xaxis, self.clutchInputHistory, color='blue')
-        self.inputChartCanvas = FigureCanvasTkAgg(self.inputChart, master=self.inputFrame)
-        self.inputChartCanvas.draw()
-        self.inputChartCanvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
 
 
     def readQueue(self):
         if not self.queue.empty():
             message = self.queue.get()
             json_acceptable_string = message.replace("'", "\"")
-            print(json_acceptable_string)
 
             converted_message = json.loads(json_acceptable_string)
             self.updateOverlay(converted_message)
@@ -71,7 +80,7 @@ class iRacingOverlay(tk.Tk):
 
     def updateOverlay(self, data):
         # Update speed label
-        self.speedLabel.config(text=f"{data['speed']} km/h")
+        self.speedLabel.config(text=f"{data['speed']}")
         # Update gear label
         self.gearLabel.config(text=data['gear'])
 
@@ -87,11 +96,9 @@ class iRacingOverlay(tk.Tk):
         self.clutchInputHistory.pop(0)
         self.clutchInputHistory.append(data['clutch'])
 
+        # Update the input chart
         self.inputChart.clear()
-        self.inputChartPlot = self.inputChart.add_subplot(111)
-        self.inputChartPlot.plot(self.inputChart_xaxis, self.throttleInputHistory, color='green')
-        self.inputChartPlot.plot(self.inputChart_xaxis, self.brakeInputHistory, color='red')
-        self.inputChartPlot.plot(self.inputChart_xaxis, self.clutchInputHistory, color='blue')
+        self.updateInputChart()
         self.inputChartCanvas.draw()
 
 
