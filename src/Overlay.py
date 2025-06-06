@@ -12,6 +12,7 @@ class iRacingOverlay(tk.Tk):
         self.queue = queue
         self.title("iRacing Overlay")
         self.geometry("240x100")
+        self.attributes("-alpha", 0.8)  # Set transparency
         self.configure(bg='black')
         self.focus_force()
         self.attributes("-topmost", True)  # Keep the window on top
@@ -64,9 +65,9 @@ class iRacingOverlay(tk.Tk):
         self.inputChartPlot.axes.get_yaxis().set_visible(False)
         self.inputChartPlot.axes.set_xlim(0, 100)
         self.inputChartPlot.axes.set_ylim(0, 100)
-        self.inputChartPlot.plot(self.inputChart_xaxis, self.throttleInputHistory, color='green')
-        self.inputChartPlot.plot(self.inputChart_xaxis, self.brakeInputHistory, color='red')
-        self.inputChartPlot.plot(self.inputChart_xaxis, self.clutchInputHistory, color='blue')
+        self.inputChartPlot.plot(self.inputChart_xaxis, self.throttleInputHistory, color='green', linewidth=1.5)
+        self.inputChartPlot.plot(self.inputChart_xaxis, self.brakeInputHistory, color='red', linewidth=1.5)
+        self.inputChartPlot.plot(self.inputChart_xaxis, self.clutchInputHistory, color='blue', linewidth=1.5)
 
 
     def readQueue(self):
@@ -76,7 +77,7 @@ class iRacingOverlay(tk.Tk):
 
             converted_message = json.loads(json_acceptable_string)
             self.updateOverlay(converted_message)
-        self.after(60, self.readQueue)
+        self.after(20, self.readQueue)
 
     def updateOverlay(self, data):
         # Update speed label
@@ -110,7 +111,7 @@ class iRacingOverlay(tk.Tk):
             print("Overlay closed.")
 
     def on_key_press(self, event):
-        if(event.keysym == 'F6'):
+        if(event.keysym == 'F7'):
             self.editMode = not self.editMode
             print("Setting edit mode to", self.editMode)
 

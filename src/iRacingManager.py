@@ -85,7 +85,7 @@ class iRacingManager:
                     self.queue.put(message)
                 
                 # maximum you can use is 1/60
-                time.sleep(1/10)
+                time.sleep(1/30)
         except KeyboardInterrupt:
             self.ir.shutdown()
             print("Exiting iRacingManager.")
