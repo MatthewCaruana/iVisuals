@@ -11,35 +11,32 @@ class iRacingOverlay(tk.Tk):
         super().__init__(*args, **kwargs)
         self.queue = queue
         self.title("iRacing Overlay")
-        self.geometry("240x100")
-        self.attributes("-alpha", 0.9)  # Set transparency
-        self.configure(bg='black')
-        self.focus_force()
+        self.geometry("0x0")
+        self.attributes("-alpha", 0)  # Set transparency
         self.attributes("-topmost", True)  # Keep the window on top
         self.overrideredirect(True)  # Remove window decorations
-
-        self.inputChart_xaxis = list(range(100))
-        self.throttleInputHistory = [0] * 100
-        self.brakeInputHistory = [0] * 100
-        self.clutchInputHistory = [0] * 100
 
         self.editMode = False
 
         self.after(0, self.readQueue)
 
-        self.setBindings()
-        self.createUIElements()
-        
-    def setBindings(self):
-        self.bind("<KeyPress>", self.on_key_press) 
-        self.bind("<Button-1>", self.on_mouse_click)  # Left mouse button click
-        self.bind("<B1-Motion>", self.on_mouse_drag)
-        self.bind("<ButtonRelease-1>", self.on_mouse_release)
-        self.bind("<Escape>", lambda e: self.destroy())  # Escape key to close the overlay
+        self.setBaseWindowBindings(self)
+        self.createInputUIElements()
 
-    def createUIElements(self):
+    def createInputUIElements(self):
+        self.inputChart_xaxis = list(range(100))
+        self.throttleInputHistory = [0] * 100
+        self.brakeInputHistory = [0] * 100
+        self.clutchInputHistory = [0] * 100
+
+        self.inputWindow = tk.Toplevel()
+        self.inputWindow.geometry("240x100")
+        self.inputWindow.attributes("-alpha", 0.9)  # Set transparency
+        self.inputWindow.attributes("-topmost", True)  # Keep the window on top
+        self.inputWindow.overrideredirect(True)  # Remove window decorations
+
         # Create a frame for the input history
-        self.inputFrame = tk.Frame(self, bg='#404040')
+        self.inputFrame = tk.Frame(self.inputWindow, bg='#404040')
         self.inputFrame.grid(padx=0, pady=0, sticky='nsew')
 
         # Create Gear label
@@ -57,6 +54,7 @@ class iRacingOverlay(tk.Tk):
         self.inputChartCanvas.get_tk_widget().grid(column=1, row=0, rowspan=2, padx=0, pady=0, sticky='nsew')
         self.inputChartCanvas._tkcanvas.config(bg='#404040')
 
+        self.setBaseWindowBindings(self.inputWindow)
 
     def updateInputChart(self):
         self.inputChartPlot = self.inputChart.add_subplot(111)
@@ -109,34 +107,40 @@ class iRacingOverlay(tk.Tk):
         self.inputChartCanvas.draw()
 
 
+    def setBaseWindowBindings(self, window):
+        def on_key_press(event):
+            if(event.keysym == 'F7'):
+                self.editMode = not self.editMode
+                print("Setting edit mode to", self.editMode)
+
+        def on_mouse_click(event):
+            if self.editMode:
+                # Handle mouse click events
+                window.offset_x =window.winfo_pointerx() - window.winfo_rootx()
+                window.offset_y = window.winfo_pointery() - window.winfo_rooty()
+
+        def on_mouse_drag(event):
+            if self.editMode:
+                if None not in (window.offset_x, window.offset_y):
+                    x = window.winfo_pointerx() - window.offset_x
+                    y = window.winfo_pointery() - window.offset_y
+                    window.geometry(f"+{x}+{y}")
+
+        def on_mouse_release(event):
+            if self.editMode:
+                # Reset the offset when the mouse is released
+                window.offset_x = None
+                window.offset_y = None
+
+        window.bind("<KeyPress>", on_key_press)
+        window.bind("<Button-1>", on_mouse_click)
+        window.bind("<B1-Motion>", on_mouse_drag)
+        window.bind("<ButtonRelease-1>", on_mouse_release)
+        window.bind("<Escape>", lambda e: window.destroy())  # Escape key to close the overlay
+
     def run(self):
         try:
             self.mainloop()
         except KeyboardInterrupt:
             self.destroy()
             print("Overlay closed.")
-
-    def on_key_press(self, event):
-        if(event.keysym == 'F7'):
-            self.editMode = not self.editMode
-            print("Setting edit mode to", self.editMode)
-
-
-    def on_mouse_click(self, event):
-        if self.editMode:
-            # Handle mouse click events
-            self.offset_x =self.winfo_pointerx() - self.winfo_rootx()
-            self.offset_y = self.winfo_pointery() - self.winfo_rooty()
-
-    def on_mouse_drag(self, event):
-        if self.editMode:
-            if None not in (self.offset_x, self.offset_y):
-                x = self.winfo_pointerx() - self.offset_x
-                y = self.winfo_pointery() - self.offset_y
-                self.geometry(f"+{x}+{y}")
-
-    def on_mouse_release(self, event):
-        if self.editMode:
-            # Reset the offset when the mouse is released
-            self.offset_x = None
-            self.offset_y = None
