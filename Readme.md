@@ -3,13 +3,16 @@
 
 # Currently working components:
 - Speed
-
-# Components currently in WIPL
-- Speed visuals (currently very basic with tutorial visuals)
+- Gear
 - Braking
 - Throttle
+- Clutch
 
-# Packages used
+# Components currently in WIP:
+- Input section visual overhaul
+
+# Packages used: 
 - tkinter (visuals)
 - irsdk (iRacing sdk)
+- matplotlib (graphing)
 - multiprocessing (queuing and message handling)
