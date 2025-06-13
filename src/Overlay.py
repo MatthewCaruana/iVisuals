@@ -12,7 +12,7 @@ class iRacingOverlay(tk.Tk):
         self.queue = queue
         self.title("iRacing Overlay")
         self.geometry("240x100")
-        self.attributes("-alpha", 0.8)  # Set transparency
+        self.attributes("-alpha", 0.9)  # Set transparency
         self.configure(bg='black')
         self.focus_force()
         self.attributes("-topmost", True)  # Keep the window on top
@@ -50,11 +50,11 @@ class iRacingOverlay(tk.Tk):
         self.speedLabel = tk.Label(self.inputFrame, text="0", fg='white', bg='#404040', font=('Calibri', 10))
         self.speedLabel.grid(row=1, column=0, padx=10, pady=10, sticky='nsew')
 
-        self.inputChart = Figure(figsize=(2, 1), dpi=100, frameon=False, tight_layout=True)
+        self.inputChart = Figure(figsize=(2, 1), dpi=100, frameon=False, constrained_layout=True)
         self.updateInputChart()
         self.inputChartCanvas = FigureCanvasTkAgg(self.inputChart, master=self.inputFrame)
         self.inputChartCanvas.draw()
-        self.inputChartCanvas.get_tk_widget().grid(column=1, row=0, rowspan=2, padx=1, pady=1, sticky='nsew')
+        self.inputChartCanvas.get_tk_widget().grid(column=1, row=0, rowspan=2, padx=0, pady=0, sticky='nsew')
         self.inputChartCanvas._tkcanvas.config(bg='#404040')
 
 
@@ -65,6 +65,12 @@ class iRacingOverlay(tk.Tk):
         self.inputChartPlot.axes.get_yaxis().set_visible(False)
         self.inputChartPlot.axes.set_xlim(0, 100)
         self.inputChartPlot.axes.set_ylim(0, 100)
+        for spine in self.inputChartPlot.spines.values():
+            spine.set_visible(False)
+        self.inputChartPlot.axhline(y=20, color='grey', linewidth=0.5)
+        self.inputChartPlot.axhline(y=40, color='grey', linewidth=0.5)
+        self.inputChartPlot.axhline(y=60, color='grey', linewidth=0.5)
+        self.inputChartPlot.axhline(y=80, color='grey', linewidth=0.5)
         self.inputChartPlot.plot(self.inputChart_xaxis, self.throttleInputHistory, color='green', linewidth=1.5)
         self.inputChartPlot.plot(self.inputChart_xaxis, self.brakeInputHistory, color='red', linewidth=1.5)
         self.inputChartPlot.plot(self.inputChart_xaxis, self.clutchInputHistory, color='blue', linewidth=1.5)
