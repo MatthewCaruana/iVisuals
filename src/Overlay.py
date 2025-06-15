@@ -118,9 +118,6 @@ class iRacingOverlay(tk.Tk):
         self.clutchInputHistory.pop(0)
         self.clutchInputHistory.append(data['clutch'])
 
-        if(self.currentBestLaps != data['best_laps']):
-            self.currentBestLaps = data['best_laps']
-
         # Update the input chart
         self.inputChart.clear()
         self.updateInputChart()

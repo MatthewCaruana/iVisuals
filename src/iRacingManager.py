@@ -57,7 +57,7 @@ class iRacingManager:
         if (self.ir['DriverInfo']):
             driverInfo = self.ir['DriverInfo']
         if (self.ir['SessionInfo']):
-            sessionInfo = self.ir['SessionInfo'][0]
+            sessionInfo = self.ir['SessionInfo']['Sessions'][0]
         if (sessionInfo['SessionType'] == 'Qualify' and self.ir['QualifyResultsInfo']):
             qualifyResultsInfo = self.ir['QualifyResultsInfo']
 
@@ -65,12 +65,11 @@ class iRacingManager:
         self.standingsInfo['Standings'] = []
         self.standingsInfo['SessionType'] = sessionInfo['SessionType']
 
-        for i in range(sessionInfo['Sessions']['ResultsPositions']):
-            currentPosition = sessionInfo['Sessions']['Results'][i]
-            
-            driverInCurrentPosition = driverInfo['Drivers']
+        for i in range(len(sessionInfo['ResultsPositions'])):
+            positionInfo = sessionInfo['ResultsPositions'][i]
 
-            positionInfo = sessionInfo['Sessions']['ResultsPositions'][i]
+            driverInCurrentPosition = _get_current_driver_info(driverInfo, positionInfo['CarIdx'])
+
             positionInfo['DriverName'] = driverInCurrentPosition['TeamName']
             positionInfo['CarNumber'] = driverInCurrentPosition['CarNumber']
             positionInfo['CarScreenName'] = driverInCurrentPosition['CarScreenName']
@@ -128,7 +127,13 @@ class iRacingManager:
                 
                 # maximum you can use is 1/60
                 time.sleep(1/30)
-        except KeyboardInterrupt:
+        except KeyboardInterrupt: 
             self.ir.shutdown()
             print("Exiting iRacingManager.")
             pass
+
+def _get_current_driver_info(driverInfo, carIdx):
+    for driver in driverInfo['Drivers']:
+        if driver['CarIdx'] == carIdx:
+            return driver
+    return None
