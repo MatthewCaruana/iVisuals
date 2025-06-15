@@ -1,5 +1,6 @@
 import irsdk
 import time
+import json
 
 
 # this is our State class, with some helpful variables
@@ -15,6 +16,7 @@ class iRacingManager:
         self.state = State()
 
         self.queue = queue
+        self.tick = 0
 
     
     # here we check if we are connected to iracing
@@ -51,6 +53,37 @@ class iRacingManager:
         else:
             self.currentGear = str(self.ir['Gear'])
 
+    def updateStandings(self):
+        if (self.ir['DriverInfo']):
+            driverInfo = self.ir['DriverInfo']
+        if (self.ir['SessionInfo']):
+            sessionInfo = self.ir['SessionInfo'][0]
+        if (sessionInfo['SessionType'] == 'Qualify' and self.ir['QualifyResultsInfo']):
+            qualifyResultsInfo = self.ir['QualifyResultsInfo']
+
+        self.standingsInfo = {}
+        self.standingsInfo['Standings'] = []
+        self.standingsInfo['SessionType'] = sessionInfo['SessionType']
+
+        for i in range(sessionInfo['Sessions']['ResultsPositions']):
+            currentPosition = sessionInfo['Sessions']['Results'][i]
+            
+            driverInCurrentPosition = driverInfo['Drivers']
+
+            positionInfo = sessionInfo['Sessions']['ResultsPositions'][i]
+            positionInfo['DriverName'] = driverInCurrentPosition['TeamName']
+            positionInfo['CarNumber'] = driverInCurrentPosition['CarNumber']
+            positionInfo['CarScreenName'] = driverInCurrentPosition['CarScreenName']
+            positionInfo['IRating'] = driverInCurrentPosition['IRating']
+            positionInfo['LicLevel'] = driverInCurrentPosition['LicLevel']
+            positionInfo['LicSubLevel'] = driverInCurrentPosition['LicSubLevel']
+            positionInfo['CurDriverIncidentCount'] = driverInCurrentPosition['CurDriverIncidentCount']
+
+            self.standingsInfo['Standings'].append(positionInfo)
+
+        
+
+
     def loop(self):
         self.ir.freeze_var_buffer_latest()
 
@@ -59,6 +92,11 @@ class iRacingManager:
         self.updateBrake()
         self.updateClutch()
         self.updateGear()
+        if(self.tick % 60 == 0):
+            self.updateStandings()
+        else:
+            self.tick += 1
+            self.standingsInfo = {}
 
     def constructMessage(self):
         message={
@@ -67,7 +105,11 @@ class iRacingManager:
             'brake': self.currentBrake,
             'clutch': self.currentClutch,
             'gear': self.currentGear,
+            'standings': self.standingsInfo
+            #'best_laps': self.ir['CarIdxBestLapTime']
         } 
+            
+
         return str(message)
 
     

@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 import json
 
 from matplotlib.figure import Figure
@@ -22,6 +23,7 @@ class iRacingOverlay(tk.Tk):
 
         self.setBaseWindowBindings(self)
         self.createInputUIElements()
+        self.createStandingsUIElements()
 
     def createInputUIElements(self):
         self.inputChart_xaxis = list(range(100))
@@ -30,7 +32,7 @@ class iRacingOverlay(tk.Tk):
         self.clutchInputHistory = [0] * 100
 
         self.inputWindow = tk.Toplevel()
-        self.inputWindow.geometry("240x100")
+        self.inputWindow.geometry("220x100")
         self.inputWindow.attributes("-alpha", 0.9)  # Set transparency
         self.inputWindow.attributes("-topmost", True)  # Keep the window on top
         self.inputWindow.overrideredirect(True)  # Remove window decorations
@@ -41,11 +43,11 @@ class iRacingOverlay(tk.Tk):
 
         # Create Gear label
         self.gearLabel = tk.Label(self.inputFrame, text="N", fg='white', bg='#404040', font=('Calibri', 18, 'bold'))
-        self.gearLabel.grid(row=0, column=0, padx=10, pady=10, sticky='nsew')
+        self.gearLabel.grid(row=0, column=0, padx=5, pady=5, sticky='nsew')
 
         # Create Speed label
         self.speedLabel = tk.Label(self.inputFrame, text="0", fg='white', bg='#404040', font=('Calibri', 10))
-        self.speedLabel.grid(row=1, column=0, padx=10, pady=10, sticky='nsew')
+        self.speedLabel.grid(row=1, column=0, padx=5, pady=5, sticky='nsew')
 
         self.inputChart = Figure(figsize=(2, 1), dpi=100, frameon=False, constrained_layout=True)
         self.updateInputChart()
@@ -55,6 +57,22 @@ class iRacingOverlay(tk.Tk):
         self.inputChartCanvas._tkcanvas.config(bg='#404040')
 
         self.setBaseWindowBindings(self.inputWindow)
+
+    def createStandingsUIElements(self):
+        self.currentBestLaps = []
+
+        self.standingsWindow = tk.Toplevel()
+        self.standingsWindow.geometry("240x500")
+        self.standingsWindow.attributes("-alpha", 0.9)
+        self.standingsWindow.attributes("-topmost", True)  # Keep the window on top
+        self.standingsWindow.overrideredirect(True)  # Remove window decorations
+
+        self.standingsFrame = tk.Frame(self.standingsWindow, bg='#404040')
+        self.standingsFrame.grid(padx=0, pady=0, sticky='nsew')
+
+        self.stangingsTable = ttk.Treeview(self.standingsFrame)
+
+        self.setBaseWindowBindings(self.standingsWindow)
 
     def updateInputChart(self):
         self.inputChartPlot = self.inputChart.add_subplot(111)
@@ -72,7 +90,6 @@ class iRacingOverlay(tk.Tk):
         self.inputChartPlot.plot(self.inputChart_xaxis, self.throttleInputHistory, color='green', linewidth=1.5)
         self.inputChartPlot.plot(self.inputChart_xaxis, self.brakeInputHistory, color='red', linewidth=1.5)
         self.inputChartPlot.plot(self.inputChart_xaxis, self.clutchInputHistory, color='blue', linewidth=1.5)
-
 
     def readQueue(self):
         if not self.queue.empty():
@@ -101,11 +118,13 @@ class iRacingOverlay(tk.Tk):
         self.clutchInputHistory.pop(0)
         self.clutchInputHistory.append(data['clutch'])
 
+        if(self.currentBestLaps != data['best_laps']):
+            self.currentBestLaps = data['best_laps']
+
         # Update the input chart
         self.inputChart.clear()
         self.updateInputChart()
         self.inputChartCanvas.draw()
-
 
     def setBaseWindowBindings(self, window):
         def on_key_press(event):
