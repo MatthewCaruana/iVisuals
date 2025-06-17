@@ -5,10 +5,12 @@ import json
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
+from SettingsManager import SettingsManager
+
 import time
 
 class iRacingOverlay(tk.Tk):
-    def __init__(self, queue, settings, *args, **kwargs):
+    def __init__(self, queue, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.queue = queue
         self.title("iRacing Overlay")
@@ -25,6 +27,8 @@ class iRacingOverlay(tk.Tk):
         self.createInputUIElements()
         self.createStandingsUIElements()
 
+        self.settings = SettingsManager()
+
     def createInputUIElements(self):
         self.inputChart_xaxis = list(range(100))
         self.throttleInputHistory = [0] * 100
@@ -32,21 +36,21 @@ class iRacingOverlay(tk.Tk):
         self.clutchInputHistory = [0] * 100
 
         self.inputWindow = tk.Toplevel()
-        self.inputWindow.geometry("220x100")
-        self.inputWindow.attributes("-alpha", 0.9)  # Set transparency
-        self.inputWindow.attributes("-topmost", True)  # Keep the window on top
+        self.inputWindow.geometry(self.settings.get_setting("InputUI", "geometry_xy"))
+        self.inputWindow.attributes("-alpha", self.settings.get_setting("InputUI", "alpha"))  # Set transparency
+        self.inputWindow.attributes("-topmost", self.settings.get_setting("InputUI", "topmost"))  # Keep the window on top
         self.inputWindow.overrideredirect(True)  # Remove window decorations
 
         # Create a frame for the input history
-        self.inputFrame = tk.Frame(self.inputWindow, bg='#404040')
+        self.inputFrame = tk.Frame(self.inputWindow, bg=self.settings.get_setting("InputUI", "background_color"))
         self.inputFrame.grid(padx=0, pady=0, sticky='nsew')
 
         # Create Gear label
-        self.gearLabel = tk.Label(self.inputFrame, text="N", fg='white', bg='#404040', font=('Calibri', 18, 'bold'))
+        self.gearLabel = tk.Label(self.inputFrame, text="N", fg='white', bg=self.settings.get_setting("InputUI", "background_color"), font=('Calibri', 18, 'bold'))
         self.gearLabel.grid(row=0, column=0, padx=5, pady=5, sticky='nsew')
 
         # Create Speed label
-        self.speedLabel = tk.Label(self.inputFrame, text="0", fg='white', bg='#404040', font=('Calibri', 10))
+        self.speedLabel = tk.Label(self.inputFrame, text="0", fg='white', bg=self.settings.get_setting("InputUI", "background_color"), font=('Calibri', 10))
         self.speedLabel.grid(row=1, column=0, padx=5, pady=5, sticky='nsew')
 
         self.inputChart = Figure(figsize=(2, 1), dpi=100, frameon=False, constrained_layout=True)
@@ -54,7 +58,7 @@ class iRacingOverlay(tk.Tk):
         self.inputChartCanvas = FigureCanvasTkAgg(self.inputChart, master=self.inputFrame)
         self.inputChartCanvas.draw()
         self.inputChartCanvas.get_tk_widget().grid(column=1, row=0, rowspan=2, padx=0, pady=0, sticky='nsew')
-        self.inputChartCanvas._tkcanvas.config(bg='#404040')
+        self.inputChartCanvas._tkcanvas.config(bg=self.settings.get_setting("InputUI", "background_color"))
 
         self.setBaseWindowBindings(self.inputWindow)
 
@@ -62,12 +66,12 @@ class iRacingOverlay(tk.Tk):
         self.currentBestLaps = []
 
         self.standingsWindow = tk.Toplevel()
-        self.standingsWindow.geometry("240x500")
-        self.standingsWindow.attributes("-alpha", 0.9)
-        self.standingsWindow.attributes("-topmost", True)  # Keep the window on top
+        self.standingsWindow.geometry(self.settings.get_setting("StandingsUI", "geometry_xy"))
+        self.standingsWindow.attributes("-alpha", self.settings.get_setting("StandingsUI", "alpha"))
+        self.standingsWindow.attributes("-topmost", self.settings.get_setting("StandingsUI", "topmost"))  # Keep the window on top
         self.standingsWindow.overrideredirect(True)  # Remove window decorations
 
-        self.standingsFrame = tk.Frame(self.standingsWindow, bg='#404040')
+        self.standingsFrame = tk.Frame(self.standingsWindow, bg=self.settings.get_setting("StandingsUI", "background_color"))
         self.standingsFrame.grid(padx=0, pady=0, sticky='nsew')
 
         self.stangingsTable = ttk.Treeview(self.standingsFrame)
@@ -153,7 +157,7 @@ class iRacingOverlay(tk.Tk):
         window.bind("<B1-Motion>", on_mouse_drag)
         window.bind("<ButtonRelease-1>", on_mouse_release)
         window.bind("<Escape>", lambda e: window.destroy())  # Escape key to close the overlay
-
+        
     def run(self):
         try:
             self.mainloop()

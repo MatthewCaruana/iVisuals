@@ -10,21 +10,13 @@ import os
 
 
 if __name__ == '__main__':
-    #load any existing settings currently stored in the settings.json file
-    settings_path = os.path.join(os.path.dirname(__file__), 'settings.json')
-    if os.path.exists(settings_path):
-        with open(settings_path, 'r') as f:
-            settings = json.load(f)
-    else:
-        settings = {}
-
     try:
         # Create a queue for inter-process communication
         queue = Queue()
 
         # Initialize managers
-        iRManager = iRacingManager(queue, settings)
-        overlay = iRacingOverlay(queue, settings)
+        iRManager = iRacingManager(queue)
+        overlay = iRacingOverlay(queue)
 
         # Setup the iRacingManager in a separate process
         iRManagerThread = Process(target=iRManager.run)

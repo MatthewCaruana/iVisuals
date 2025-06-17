@@ -1,0 +1,27 @@
+{
+    "InputUI":{
+        "geometry_xy": "220x100",
+        "alpha": 0.9,
+        "topmost": true,
+        "background_color": "#404040",
+        "gear_textfont": "Calibri",
+        "gear_textsize": 18,
+        "gear_textbold": "bold",
+        "speed_textfont": "Calibri",
+        "speed_textsize": 10,
+        "speed_textbold": "normal",
+    },
+    "StandingsUI":{
+        "geometry_xy": "240x500",
+        "alpha": 0.9,
+        "topmost": true,
+        "background_color": "#404040",
+        "textfont": "Calibri",
+        "textsize": 10,
+        "textbold": "normal",
+        "show_car_number": true,
+        "show_driver_name": true,
+        "show_class_position": true,
+        "show_overall_position": true
+    }
+}
