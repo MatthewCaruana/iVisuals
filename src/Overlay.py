@@ -22,12 +22,12 @@ class iRacingOverlay(tk.Tk):
         self.editMode = False
 
         self.after(0, self.readQueue)
+        self.settings = SettingsManager()
 
         self.setBaseWindowBindings(self)
         self.createInputUIElements()
         self.createStandingsUIElements()
 
-        self.settings = SettingsManager()
 
     def createInputUIElements(self):
         self.inputChart_xaxis = list(range(100))

@@ -9,7 +9,7 @@
         "gear_textbold": "bold",
         "speed_textfont": "Calibri",
         "speed_textsize": 10,
-        "speed_textbold": "normal",
+        "speed_textbold": "normal"
     },
     "StandingsUI":{
         "geometry_xy": "240x500",

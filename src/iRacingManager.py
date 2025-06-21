@@ -10,7 +10,7 @@ class State:
 
 class iRacingManager:
 
-    def __init__(self, queue, settings):
+    def __init__(self, queue):
         # initializing ir and state
         self.ir = irsdk.IRSDK()
         self.state = State()
