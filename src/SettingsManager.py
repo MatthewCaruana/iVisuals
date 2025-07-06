@@ -23,7 +23,6 @@ class SettingsManager:
         settings_path = os.path.join(os.path.dirname(__file__), 'settings.json')
         with open(settings_path, 'w') as f:
             json.dump(self.settings, f, indent=4)
-        print("Settings saved to", settings_path)
 
     def get_setting(self, ui, setting):
         if setting in self.settings[ui]:
