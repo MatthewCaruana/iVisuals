@@ -1,5 +1,5 @@
 {
-    "InputUI":{
+    "InputUI": {
         "geometry_xy": "220x100",
         "alpha": 0.9,
         "topmost": true,
@@ -9,9 +9,11 @@
         "gear_textbold": "bold",
         "speed_textfont": "Calibri",
         "speed_textsize": 10,
-        "speed_textbold": "normal"
+        "speed_textbold": "normal",
+        "offset_x": 1336,
+        "offset_y": 465
     },
-    "StandingsUI":{
+    "StandingsUI": {
         "geometry_xy": "240x500",
         "alpha": 0.9,
         "topmost": true,
@@ -22,6 +24,8 @@
         "show_car_number": true,
         "show_driver_name": true,
         "show_class_position": true,
-        "show_overall_position": true
+        "show_overall_position": true,
+        "offset_x": 314,
+        "offset_y": 400
     }
 }

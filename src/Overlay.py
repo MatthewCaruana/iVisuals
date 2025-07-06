@@ -36,7 +36,10 @@ class iRacingOverlay(tk.Tk):
         self.clutchInputHistory = [0] * 100
 
         self.inputWindow = tk.Toplevel()
-        self.inputWindow.geometry(self.settings.get_setting("InputUI", "geometry_xy"))
+
+        geometry_offset = self.settings.get_setting("InputUI", "geometry_xy") + "+" + str(self.settings.get_setting("InputUI", "offset_x")) + "+" + str(self.settings.get_setting("InputUI", "offset_y"))
+
+        self.inputWindow.geometry(geometry_offset)
         self.inputWindow.attributes("-alpha", self.settings.get_setting("InputUI", "alpha"))  # Set transparency
         self.inputWindow.attributes("-topmost", self.settings.get_setting("InputUI", "topmost"))  # Keep the window on top
         self.inputWindow.overrideredirect(True)  # Remove window decorations
@@ -65,8 +68,10 @@ class iRacingOverlay(tk.Tk):
     def createStandingsUIElements(self):
         self.currentBestLaps = []
 
+        geometry_offset = self.settings.get_setting("StandingsUI", "geometry_xy") + "+" + str(self.settings.get_setting("StandingsUI", "offset_x")) + "+" + str(self.settings.get_setting("StandingsUI", "offset_y"))
+
         self.standingsWindow = tk.Toplevel()
-        self.standingsWindow.geometry(self.settings.get_setting("StandingsUI", "geometry_xy"))
+        self.standingsWindow.geometry(geometry_offset)
         self.standingsWindow.attributes("-alpha", self.settings.get_setting("StandingsUI", "alpha"))
         self.standingsWindow.attributes("-topmost", self.settings.get_setting("StandingsUI", "topmost"))  # Keep the window on top
         self.standingsWindow.overrideredirect(True)  # Remove window decorations
@@ -77,6 +82,7 @@ class iRacingOverlay(tk.Tk):
         self.stangingsTable = ttk.Treeview(self.standingsFrame)
 
         self.setBaseWindowBindings(self.standingsWindow)
+        self.updateStandingsUI()
 
     def updateInputChart(self):
         self.inputChartPlot = self.inputChart.add_subplot(111)
@@ -94,6 +100,27 @@ class iRacingOverlay(tk.Tk):
         self.inputChartPlot.plot(self.inputChart_xaxis, self.throttleInputHistory, color='green', linewidth=1.5)
         self.inputChartPlot.plot(self.inputChart_xaxis, self.brakeInputHistory, color='red', linewidth=1.5)
         self.inputChartPlot.plot(self.inputChart_xaxis, self.clutchInputHistory, color='blue', linewidth=1.5)
+
+    def updateStandingsUI(self):
+        self.stangingsTable.destroy()
+        self.stangingsTable = ttk.Treeview(self.standingsFrame, columns=('Position', 'Driver', 'Car', 'Laps', 'Best Lap'), show='headings')
+        self.stangingsTable.heading('Position', text='Pos')
+        self.stangingsTable.heading('Driver', text='Driver')
+        self.stangingsTable.heading('Car', text='Car')
+        self.stangingsTable.heading('Laps', text='Laps')
+        self.stangingsTable.heading('Best Lap', text='Best Lap')
+
+        # Add the table to the frame
+        self.stangingsTable.grid(row=0, column=0, padx=5, pady=5, sticky='nsew')
+
+        # Configure the columns
+        for col in self.stangingsTable['columns']:
+            self.stangingsTable.column(col, anchor='center')
+
+        # Add a scrollbar
+        scrollbar = ttk.Scrollbar(self.standingsFrame, orient="vertical", command=self.stangingsTable.yview)
+        scrollbar.grid(row=0, column=1, sticky='ns')
+        self.stangingsTable.configure(yscrollcommand=scrollbar.set)
 
     def readQueue(self):
         if not self.queue.empty():
@@ -127,11 +154,21 @@ class iRacingOverlay(tk.Tk):
         self.updateInputChart()
         self.inputChartCanvas.draw()
 
+    def updateUILocationSettings(self):
+        self.settings.update_settings("InputUI", "offset_x", self.inputWindow.winfo_x())
+        self.settings.update_settings("InputUI", "offset_y", self.inputWindow.winfo_y())
+        self.settings.update_settings("StandingsUI", "offset_x", self.standingsWindow.winfo_x())
+        self.settings.update_settings("StandingsUI", "offset_y", self.standingsWindow.winfo_y())
+        print("Updated UI locations in settings.")
+
     def setBaseWindowBindings(self, window):
         def on_key_press(event):
             if(event.keysym == 'F7'):
                 self.editMode = not self.editMode
                 print("Setting edit mode to", self.editMode)
+
+                if(not self.editMode):
+                    self.updateUILocationSettings()
 
         def on_mouse_click(event):
             if self.editMode:

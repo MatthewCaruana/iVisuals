@@ -13,8 +13,8 @@ class SettingsManager:
     
     def update_settings(self, ui, setting, value):
         if setting in self.settings[ui]:
-            self.settings[setting] = value
-            ui.update_setting(setting, value)
+            self.settings[ui][setting] = value
+            #ui.update_setting(setting, value)
             self.save_settings()
         else:
             print(f"Setting '{setting}' not found in settings.")
